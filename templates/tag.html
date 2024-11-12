@@ -1,0 +1,21 @@
+{% extends "layout/base.html" %}
+
+{% block page_title %}
+Tag: {{ tag_name }}
+{% endblock %}
+
+{% block page_content %}
+
+<div class="d-flex gap-3 align-items-center mb-3">
+    <h1>Tag: {{ tag_name }}</h1>
+</div>
+
+<section class="w-75 d-flex flex-column gap-3">
+    {% for question in questions %}
+        {% include "layout/question_card.html" %}
+    {% endfor %}
+</section>
+
+{% include "layout/pagination.html" %}
+
+{% endblock %}

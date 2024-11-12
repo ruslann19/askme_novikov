@@ -1,0 +1,56 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% block page_title %}
+        {% endblock %}
+    </title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+
+    {% include "layout/header.html" %}
+
+    <main class="container-fluid my-3 d-flex">
+        
+        <section class="col-9 container ps-5">
+            {% block page_content %}
+            {% endblock %}
+        </section>
+
+        {% include "layout/sidebar.html" %}
+    </main>
+
+    {% include "layout/footer.html" %}
+
+    <script src="{% static 'js/bootstrap.js' %}"></script>
+    <script>
+        // Example starter JavaScript for disabling form submissions if there are invalid fields
+        (() => {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        const forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+            }
+
+            form.classList.add('was-validated')
+            }, false)
+        })
+        })()
+    </script>
+</body>
+
+</html>

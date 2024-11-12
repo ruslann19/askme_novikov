@@ -1,0 +1,41 @@
+{% load static %}
+
+<article class="border">
+    <div class="row m-3">
+        <div class="col-3 d-flex flex-column gap-2 align-items-center">
+            <img src="{% static 'img/Jacque_Fresco.jpeg' %}" alt="Avatar" class="img-thumbnail" style="width: 100px;">
+
+            <div class="d-flex gap-2 m-1">
+                <i class="bi bi-hand-thumbs-up"></i>
+                <button type="button" class="btn btn-outline-dark">
+                    <img src="{% static 'img/hand-thumbs-up.svg' %}" alt="bi-hand-thumbs-up"> {{ question.likes }}
+                </button>
+                <button type="button" class="btn btn-outline-dark">
+                    <img src="{% static 'img/hand-thumbs-down.svg' %}" alt="bi-hand-thumbs-down"> {{ question.dislikes }}
+                </button>
+            </div>
+        </div>
+        <div class="col-9 d-flex flex-column gap-2 justify-content-around">
+            <a href="{% url 'question' id=question.id %}">
+                <h2>
+                    {{ question.title }}
+                </h2>
+            </a>
+
+            <div>
+                {{ question.text }}
+            </div>
+
+            <div class="d-flex">
+                <div class="me-3">Answers: {{ question.answers }}</div>
+
+                <div class="d-flex gap-2">
+                    <span>Tags:</span>
+                    {% for tag in tags %}
+                        <a href="{% url 'tag' tag_name=tag %}">{{ tag }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</article>
