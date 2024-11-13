@@ -3,15 +3,15 @@
 <article class="border">
     <div class="row m-3">
         <div class="col-3 d-flex flex-column gap-2 align-items-center">
-            <img src="{% static 'img/Jacque_Fresco.jpeg' %}" alt="Avatar" class="img-thumbnail" style="width: 100px;">
+            <img src="{% static 'img/Jacque_Fresco.jpg' %}" alt="Avatar" class="img-thumbnail" style="width: 100px;">
 
             <div class="d-flex gap-2 m-1">
                 <i class="bi bi-hand-thumbs-up"></i>
                 <button type="button" class="btn btn-outline-dark">
-                    <img src="{% static 'img/hand-thumbs-up.svg' %}" alt="bi-hand-thumbs-up"> {{ question.likes }}
+                    <img src="{% static 'img/hand-thumbs-up.svg' %}" alt="bi-hand-thumbs-up"> {{ 0 }}
                 </button>
                 <button type="button" class="btn btn-outline-dark">
-                    <img src="{% static 'img/hand-thumbs-down.svg' %}" alt="bi-hand-thumbs-down"> {{ question.dislikes }}
+                    <img src="{% static 'img/hand-thumbs-down.svg' %}" alt="bi-hand-thumbs-down"> {{ 0 }}
                 </button>
             </div>
         </div>
@@ -27,11 +27,11 @@
             </div>
 
             <div class="d-flex">
-                <div class="me-3">Answers: {{ question.answers }}</div>
+                <div class="me-3">Answers: {{ question.answers.all.count }}</div>
 
                 <div class="d-flex gap-2">
                     <span>Tags:</span>
-                    {% for tag in tags %}
+                    {% for tag in question.tags.all %}
                         <a href="{% url 'tag' tag_name=tag %}">{{ tag }}</a>
                     {% endfor %}
                 </div>

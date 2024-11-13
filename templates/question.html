@@ -11,7 +11,7 @@
         <article>
             <div class="row m-3">
                 <div class="col-3 d-flex flex-column gap-2 align-items-center">
-                    <img src="{% static 'img/Jacque_Fresco.jpeg' %}" alt="Avatar" class="img-thumbnail" style="width: 100px;">
+                    <img src="{% static 'img/Jacque_Fresco.jpg' %}" alt="Avatar" class="img-thumbnail" style="width: 100px;">
 
                     <div class="d-flex gap-2 m-1">
                         <i class="bi bi-hand-thumbs-up"></i>
@@ -30,7 +30,7 @@
 
                     <div class="d-flex gap-2">
                         <span>Tags:</span>
-                        {% for tag in tags %}
+                        {% for tag in question.tags.all %}
                             <a href="{% url 'tag' tag_name=tag %}">{{ tag }}</a>
                         {% endfor %}
                     </div>
