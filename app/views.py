@@ -67,7 +67,6 @@ def tag(request: HttpRequest, tag_name):
 
 def question(request, id):
     question = Question.objects.get(pk=id)
-    print(question)
     page = paginate(question.answers.all(), request)
     context = {
         "user": user,

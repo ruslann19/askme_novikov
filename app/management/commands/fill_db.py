@@ -1,5 +1,5 @@
 from typing import Any
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 
 from app.models import *
 
@@ -13,6 +13,9 @@ class Command(BaseCommand):
         if len(class_name.objects.all()) > 0:
             return class_name.objects.last().id + 1
         return 1
+    
+    def __like_value(self, id):
+        return id % 2 == 0
 
     def handle(self, *args: Any, **kwargs: Any) -> None:
         ratio = kwargs['ratio']
@@ -22,12 +25,16 @@ class Command(BaseCommand):
         PROFILES_RATIO = ratio
         QUESTIONS_RATIO = 10 * ratio
         ANSWERS_RATIO = 100 * ratio
+        QUESTION_LIKES_RATIO = 100 * ratio
+        ANSWER_LIKES_RATIO = 100 * ratio
 
         first_tag_id = self.__first_id_to_generation(Tag)
         first_user_id = self.__first_id_to_generation(User)
         first_profile_id = self.__first_id_to_generation(Profile)
         first_question_id = self.__first_id_to_generation(Question)
         first_answer_id = self.__first_id_to_generation(Answer)
+        first_question_like_id = self.__first_id_to_generation(QuestionLike)
+        first_answer_like_id = self.__first_id_to_generation(AnswerLike)
 
         tags = [
             Tag(name=f"tag {tag_id}")
@@ -78,8 +85,8 @@ class Command(BaseCommand):
 
         answers = [
             Answer(
-                question=questions[(first_question_id + answer_id) % QUESTIONS_RATIO],
-                author=profiles[(first_profile_id + answer_id) % PROFILES_RATIO],
+                question=questions[answer_id % QUESTIONS_RATIO],
+                author=profiles[answer_id % PROFILES_RATIO],
                 text=f"Text of answer #{answer_id}",
             )
             for answer_id in range(first_answer_id, first_answer_id + ANSWERS_RATIO)
@@ -87,3 +94,27 @@ class Command(BaseCommand):
         Answer.objects.bulk_create(answers)
 
         self.stdout.write("Created answers")
+
+        quistion_likes = [
+            QuestionLike(
+                question=questions[question_like_id % QUESTIONS_RATIO],
+                user=profiles[question_like_id % PROFILES_RATIO],
+                value=self.__like_value(question_like_id),
+            )
+            for question_like_id in range(first_question_like_id, first_question_like_id + QUESTION_LIKES_RATIO)
+        ]
+        QuestionLike.objects.bulk_create(quistion_likes)
+
+        self.stdout.write("Created question likes")
+
+        answer_likes = [
+            AnswerLike(
+                answer=answers[answer_like_id % ANSWERS_RATIO],
+                user=profiles[answer_like_id % PROFILES_RATIO],
+                value=self.__like_value(answer_like_id),
+            )
+            for answer_like_id in range(first_answer_like_id, first_answer_like_id + ANSWER_LIKES_RATIO)
+        ]
+        AnswerLike.objects.bulk_create(answer_likes)
+
+        self.stdout.write("Created answer likes")

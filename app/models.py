@@ -52,6 +52,12 @@ class Question(models.Model):
 
     def __str__(self):
         return self.title
+    
+    def likes_count(self):
+        return self.likes.all().filter(value=True).count()
+    
+    def dislikes_count(self):
+        return self.likes.all().filter(value=False).count()
 
 
 class Answer(models.Model):
@@ -65,18 +71,27 @@ class Answer(models.Model):
 
     def __str__(self):
         return f"Answer from {self.author} on question \"{self.question}\""
+    
+    def likes_count(self):
+        return self.likes.all().filter(value=True).count()
+    
+    def dislikes_count(self):
+        return self.likes.all().filter(value=False).count
 
 
 class QuestionLike(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="likes")
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="question_likes")
+    value = models.BooleanField()
 
     def __str__(self):
         return f"{self.question}, {self.user}"
 
+
 class AnswerLike(models.Model):
     answer = models.ForeignKey(Answer, on_delete=models.CASCADE, related_name="likes")
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="answer_likes")
+    value = models.BooleanField()
 
     def __str__(self):
         return f"{self.answer}, {self.user}"

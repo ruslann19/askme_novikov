@@ -16,10 +16,10 @@
                     <div class="d-flex gap-2 m-1">
                         <i class="bi bi-hand-thumbs-up"></i>
                         <button type="button" class="btn btn-outline-dark">
-                            <img src="{% static 'img/hand-thumbs-up.svg' %}" alt="bi-hand-thumbs-up"> 10
+                            <img src="{% static 'img/hand-thumbs-up.svg' %}" alt="bi-hand-thumbs-up"> {{ question.likes_count }}
                         </button>
                         <button type="button" class="btn btn-outline-dark">
-                            <img src="{% static 'img/hand-thumbs-down.svg' %}" alt="bi-hand-thumbs-down"> 0
+                            <img src="{% static 'img/hand-thumbs-down.svg' %}" alt="bi-hand-thumbs-down"> {{ question.dislikes_count }}
                         </button>
                     </div>
                 </div>

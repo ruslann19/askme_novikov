@@ -7,8 +7,12 @@
 
             <div class="d-flex gap-2 m-1">
                 <i class="bi bi-hand-thumbs-up"></i>
-                <button type="button" class="btn btn-outline-dark"><img src="{% static 'img/hand-thumbs-up.svg' %}" alt="bi-hand-thumbs-up"> 10</button>
-                <button type="button" class="btn btn-outline-dark"><img src="{% static 'img/hand-thumbs-down.svg' %}" alt="bi-hand-thumbs-down"> 0</button>
+                <button type="button" class="btn btn-outline-dark">
+                    <img src="{% static 'img/hand-thumbs-up.svg' %}" alt="bi-hand-thumbs-up"> {{ answer.likes_count }}
+                </button>
+                <button type="button" class="btn btn-outline-dark">
+                    <img src="{% static 'img/hand-thumbs-down.svg' %}" alt="bi-hand-thumbs-down"> {{ answer.likes_count }}
+                </button>
             </div>
         </div>
         <div class="col-9 d-flex flex-column gap-2 justify-content-around">
