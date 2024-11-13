@@ -3,6 +3,10 @@ from django.core.management.base import BaseCommand
 
 from app.models import *
 
+from tqdm import tqdm
+import time
+
+
 class Command(BaseCommand):
     help = "Fill database"
 
@@ -18,6 +22,8 @@ class Command(BaseCommand):
         return id % 2 == 0
 
     def handle(self, *args: Any, **kwargs: Any) -> None:
+        time_begin = time.time()
+
         ratio = kwargs['ratio']
 
         TAGS_RATIO = ratio
@@ -36,14 +42,17 @@ class Command(BaseCommand):
         first_question_like_id = self.__first_id_to_generation(QuestionLike)
         first_answer_like_id = self.__first_id_to_generation(AnswerLike)
 
+
+        self.stdout.write("Creating tags")
         tags = [
             Tag(name=f"tag {tag_id}")
             for tag_id in range(first_tag_id, first_tag_id + TAGS_RATIO)
         ]
         Tag.objects.bulk_create(tags)
+        self.stdout.write(self.style.SUCCESS("Tags created"))
 
-        self.stdout.write("Created tags")
 
+        self.stdout.write("Creating users")
         users = [
             User(
                 username=f'User {user_id}',
@@ -55,19 +64,20 @@ class Command(BaseCommand):
             for user_id in range(first_user_id, first_user_id + USERS_RATIO)
         ]
         User.objects.bulk_create(users)
+        self.stdout.write(self.style.SUCCESS("Users created"))
 
-        self.stdout.write("Created users")
 
+        self.stdout.write("Creating profiles")
         profiles = [
             Profile(
-                user=users[user_id % USERS_RATIO],
-                avatar="Jacque_Fresco.jpg",
-            ) for user_id in range(first_user_id, first_user_id + USERS_RATIO)
+                user=users[profile_id % USERS_RATIO],
+            ) for profile_id in range(first_profile_id, first_profile_id + PROFILES_RATIO)
         ]
         Profile.objects.bulk_create(profiles)
+        self.stdout.write(self.style.SUCCESS("Profiles created"))
 
-        self.stdout.write("Created profiles")
 
+        self.stdout.write("Creating questions")
         questions = [
             Question(
                 title=f"Title of question #{question_id}",
@@ -77,12 +87,13 @@ class Command(BaseCommand):
             for question_id in range(first_question_id, first_question_id + QUESTIONS_RATIO)
         ]
         Question.objects.bulk_create(questions)
-        for i in range(len(questions)):
+        for i in tqdm(range(len(questions))):
             for j in range(3):
                 questions[i].tags.add(tags[(i + j) % TAGS_RATIO])
         
-        self.stdout.write("Created questions")
+        self.stdout.write(self.style.SUCCESS("Questions created"))
 
+        self.stdout.write("Creating answers")
         answers = [
             Answer(
                 question=questions[answer_id % QUESTIONS_RATIO],
@@ -92,9 +103,10 @@ class Command(BaseCommand):
             for answer_id in range(first_answer_id, first_answer_id + ANSWERS_RATIO)
         ]
         Answer.objects.bulk_create(answers)
+        self.stdout.write(self.style.SUCCESS("Answers created"))
 
-        self.stdout.write("Created answers")
 
+        self.stdout.write("Creatings question likes")
         quistion_likes = [
             QuestionLike(
                 question=questions[question_like_id % QUESTIONS_RATIO],
@@ -104,9 +116,10 @@ class Command(BaseCommand):
             for question_like_id in range(first_question_like_id, first_question_like_id + QUESTION_LIKES_RATIO)
         ]
         QuestionLike.objects.bulk_create(quistion_likes)
+        self.stdout.write(self.style.SUCCESS("Question likes created"))
 
-        self.stdout.write("Created question likes")
 
+        self.stdout.write("Creating answer likes")
         answer_likes = [
             AnswerLike(
                 answer=answers[answer_like_id % ANSWERS_RATIO],
@@ -116,5 +129,9 @@ class Command(BaseCommand):
             for answer_like_id in range(first_answer_like_id, first_answer_like_id + ANSWER_LIKES_RATIO)
         ]
         AnswerLike.objects.bulk_create(answer_likes)
+        self.stdout.write(self.style.SUCCESS("Answer likes created"))
 
-        self.stdout.write("Created answer likes")
+
+        time_end = time.time()
+        time_total = time_end - time_begin
+        self.stdout.write(f"Total time: {round(time_total, 4)} seconds")
