@@ -33,7 +33,8 @@ class QuestionManager(models.Manager):
         return self.all().order_by("-created_at")
     
     def hot(self):
-        return self.all().order_by("-rating")
+        # return self.all().order_by("-rating")
+        return self.all().order_by("created_at")
     
     def get_questions_with_tag(self, tag):
         return self.filter(tags=tag).order_by("-rating")
@@ -76,13 +77,18 @@ class Answer(models.Model):
         return self.likes.all().filter(value=True).count()
     
     def dislikes_count(self):
-        return self.likes.all().filter(value=False).count
+        return self.likes.all().filter(value=False).count()
 
 
 class QuestionLike(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="likes")
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="question_likes")
     value = models.BooleanField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["question", "user"], name="unique_question_like")
+        ]
 
     def __str__(self):
         return f"{self.question}, {self.user}"
@@ -92,6 +98,11 @@ class AnswerLike(models.Model):
     answer = models.ForeignKey(Answer, on_delete=models.CASCADE, related_name="likes")
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="answer_likes")
     value = models.BooleanField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["answer", "user"], name="unique_answer_like")
+        ]
 
     def __str__(self):
         return f"{self.answer}, {self.user}"

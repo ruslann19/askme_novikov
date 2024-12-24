@@ -23,7 +23,7 @@ from app import views
 
 urlpatterns = [
     path("admin/", admin.site.urls, name="admin"),
-    
+
     path("",                    views.index,    name="index"),
     path("hot/",                views.hot,      name="hot"),
     path("tag/<str:tag_name>/", views.tag,      name="tag"),

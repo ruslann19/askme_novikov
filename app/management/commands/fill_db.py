@@ -18,7 +18,7 @@ class Command(BaseCommand):
             return class_name.objects.last().id + 1
         return 1
     
-    def __like_value(self, id):
+    def __random_like_value(self, id):
         return id % 2 == 0
 
     def handle(self, *args: Any, **kwargs: Any) -> None:
@@ -26,13 +26,13 @@ class Command(BaseCommand):
 
         ratio = kwargs['ratio']
 
-        TAGS_RATIO = ratio
-        USERS_RATIO = ratio
-        PROFILES_RATIO = ratio
-        QUESTIONS_RATIO = 10 * ratio
-        ANSWERS_RATIO = 100 * ratio
-        QUESTION_LIKES_RATIO = 100 * ratio
-        ANSWER_LIKES_RATIO = 100 * ratio
+        TAGS = ratio
+        USERS = ratio
+        PROFILES = ratio
+        QUESTIONS = 10 * ratio
+        ANSWERS = 100 * ratio
+        QUESTION_LIKES = 100 * ratio
+        ANSWER_LIKES = 100 * ratio
 
         first_tag_id = self.__first_id_to_generation(Tag)
         first_user_id = self.__first_id_to_generation(User)
@@ -42,11 +42,13 @@ class Command(BaseCommand):
         first_question_like_id = self.__first_id_to_generation(QuestionLike)
         first_answer_like_id = self.__first_id_to_generation(AnswerLike)
 
+        self.stdout.write(f"{first_question_id}")
+
 
         self.stdout.write("Creating tags")
         tags = [
             Tag(name=f"tag {tag_id}")
-            for tag_id in range(first_tag_id, first_tag_id + TAGS_RATIO)
+            for tag_id in range(first_tag_id, first_tag_id + TAGS)
         ]
         Tag.objects.bulk_create(tags)
         self.stdout.write(self.style.SUCCESS("Tags created"))
@@ -61,7 +63,7 @@ class Command(BaseCommand):
                 email=f'user{user_id}@gmail.com',
                 password=f'pass{user_id}',
             )
-            for user_id in range(first_user_id, first_user_id + USERS_RATIO)
+            for user_id in range(first_user_id, first_user_id + USERS)
         ]
         User.objects.bulk_create(users)
         self.stdout.write(self.style.SUCCESS("Users created"))
@@ -70,8 +72,8 @@ class Command(BaseCommand):
         self.stdout.write("Creating profiles")
         profiles = [
             Profile(
-                user=users[profile_id % USERS_RATIO],
-            ) for profile_id in range(first_profile_id, first_profile_id + PROFILES_RATIO)
+                user=users[profile_id % USERS],
+            ) for profile_id in range(first_profile_id, first_profile_id + PROFILES)
         ]
         Profile.objects.bulk_create(profiles)
         self.stdout.write(self.style.SUCCESS("Profiles created"))
@@ -82,25 +84,25 @@ class Command(BaseCommand):
             Question(
                 title=f"Title of question #{question_id}",
                 text=f"Text of question #{question_id}",
-                author=profiles[question_id % PROFILES_RATIO],
+                author=profiles[question_id % PROFILES],
             )
-            for question_id in range(first_question_id, first_question_id + QUESTIONS_RATIO)
+            for question_id in range(first_question_id, first_question_id + QUESTIONS)
         ]
         Question.objects.bulk_create(questions)
         for i in tqdm(range(len(questions))):
             for j in range(3):
-                questions[i].tags.add(tags[(i + j) % TAGS_RATIO])
+                questions[i].tags.add(tags[(i + j) % TAGS])
         
         self.stdout.write(self.style.SUCCESS("Questions created"))
 
         self.stdout.write("Creating answers")
         answers = [
             Answer(
-                question=questions[answer_id % QUESTIONS_RATIO],
-                author=profiles[answer_id % PROFILES_RATIO],
+                question=questions[answer_id % QUESTIONS],
+                author=profiles[answer_id % PROFILES],
                 text=f"Text of answer #{answer_id}",
             )
-            for answer_id in range(first_answer_id, first_answer_id + ANSWERS_RATIO)
+            for answer_id in range(first_answer_id, first_answer_id + ANSWERS)
         ]
         Answer.objects.bulk_create(answers)
         self.stdout.write(self.style.SUCCESS("Answers created"))
@@ -109,11 +111,12 @@ class Command(BaseCommand):
         self.stdout.write("Creatings question likes")
         quistion_likes = [
             QuestionLike(
-                question=questions[question_like_id % QUESTIONS_RATIO],
-                user=profiles[question_like_id % PROFILES_RATIO],
-                value=self.__like_value(question_like_id),
+                question=questions[question_id % QUESTIONS],
+                user=profiles[(question_id + i) % PROFILES], # По 10 разных пользователей на каждый вопрос
+                value=self.__random_like_value(question_id),
             )
-            for question_like_id in range(first_question_like_id, first_question_like_id + QUESTION_LIKES_RATIO)
+            for question_id in range(first_question_id, first_question_id + QUESTIONS)
+            for i in range(10)
         ]
         QuestionLike.objects.bulk_create(quistion_likes)
         self.stdout.write(self.style.SUCCESS("Question likes created"))
@@ -122,11 +125,12 @@ class Command(BaseCommand):
         self.stdout.write("Creating answer likes")
         answer_likes = [
             AnswerLike(
-                answer=answers[answer_like_id % ANSWERS_RATIO],
-                user=profiles[answer_like_id % PROFILES_RATIO],
-                value=self.__like_value(answer_like_id),
+                answer=answers[answer_id % ANSWERS],
+                user=profiles[(answer_id + i) % PROFILES], # По 10 разных пользователей на каждый ответ
+                value=self.__random_like_value(answer_id),
             )
-            for answer_like_id in range(first_answer_like_id, first_answer_like_id + ANSWER_LIKES_RATIO)
+            for answer_id in range(first_answer_like_id, first_answer_like_id + ANSWERS)
+            for i in range(10)
         ]
         AnswerLike.objects.bulk_create(answer_likes)
         self.stdout.write(self.style.SUCCESS("Answer likes created"))
