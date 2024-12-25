@@ -8,6 +8,7 @@ from app.models import *
 
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 
 from app.forms import *
 
@@ -38,6 +39,8 @@ def index(request):
         "page_obj": page,
         "popular_tags": Tag.objects.popular(),
     }
+    if not request.user.is_anonymous:
+        context["profile"] = request.user.profile
     return render(request, "index.html", context)
 
 
@@ -48,6 +51,8 @@ def hot(request):
         "page_obj": page,
         "popular_tags": Tag.objects.popular(),
     }
+    if not request.user.is_anonymous:
+        context["profile"] = request.user.profile
     return render(request, "hot.html", context)
 
 
@@ -63,6 +68,8 @@ def tag(request: HttpRequest, tag_name):
         "page_obj": page,
         "popular_tags": Tag.objects.popular(),
     }
+    if not request.user.is_anonymous:
+        context["profile"] = request.user.profile
     return render(request, "tag.html", context)
 
 
@@ -107,6 +114,8 @@ def question(request, id, page_number=1):
         "popular_tags": Tag.objects.popular(),
         "form": form,
     }
+    if not request.user.is_anonymous:
+        context["profile"] = request.user.profile
     return render(request, "question.html", context)
 
 
@@ -147,13 +156,15 @@ def signup(request):
     
     elif request.method == "POST":
         user_form = UserForm(data=request.POST)
-        profile_form = ProfileForm(data=request.POST)
+        profile_form = ProfileForm(data=request.POST, files=request.FILES)
 
         if user_form.is_valid() and profile_form.is_valid():
             user = user_form.save()
             profile = profile_form.save(commit=False)
             profile.user = user
             profile.save()
+
+            auth.login(request, user)
 
             return redirect(reverse("index"))
 
@@ -175,15 +186,23 @@ def edit_profile(request):
 
     elif request.method == "POST":
         user_form = EditUserForm(data=request.POST, instance=request.user)
-        profile_form = ProfileForm(data=request.POST, instance=profile)
+        profile_form = ProfileForm(data=request.POST, files=request.FILES, instance=profile)
 
         if user_form.is_valid() and profile_form.is_valid():
             user = user_form.save()
+            profile = Profile.objects.get(user=user)
+            
+            if profile_form.cleaned_data.get("avatar") == False:
+                profile.avatar.delete()
+            
             profile = profile_form.save(commit=False)
             profile.user = user
             profile.save()
 
+        return HttpResponseRedirect(request.path_info)
+
     context = {
+        "profile": request.user.profile,
         "popular_tags": Tag.objects.popular(),
         "user_form": user_form,
         "profile_form": profile_form,
@@ -207,9 +226,9 @@ def change_password(request):
             auth.login(request, user)
         
             return redirect(reverse("edit_profile"))
-        
     
     context = {
+        "profile": request.user.profile,
         "popular_tags": Tag.objects.popular(),
         "form": form,
     }
@@ -242,7 +261,38 @@ def ask(request):
             return redirect(f"/question/{question.id}/")
 
     context = {
+        "profile": request.user.profile,
         "popular_tags": Tag.objects.popular(),
         "form": form,
     }
     return render(request, "ask.html", context)
+
+
+@require_POST
+@login_required
+def like_question(request, question_id):
+    question = Question.objects.get(id=question_id)
+    profile = request.user.profile
+    value = (request.POST.get("value") == "Like")
+
+    print(question)
+    print(profile)
+    print(value)
+
+    exists = QuestionLike.objects.filter(question=question, profile=profile).exists()
+
+    if exists:
+        pass
+
+    QuestionLike.objects.create(
+        question=question,
+        profile=profile,
+        value=value
+    )
+
+    # return HttpResponseRedirect(request.path_info)
+    return redirect(reverse("index"))
+
+@login_required
+def like_answer(requset, answer_id):
+    pass

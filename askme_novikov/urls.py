@@ -21,6 +21,9 @@ from django.urls import include
 
 from app import views
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
     path("admin/", admin.site.urls, name="admin"),
 
@@ -36,4 +39,10 @@ urlpatterns = [
     path("profile/edit/password/",       views.change_password, name="change_password"),
     
     path("ask/",                         views.ask,          name="ask"),
+
+    path("like_question/<int:question_id>", views.like_question, name="like_question"),
+    path("like_answer/<int:answer_id>", views.like_question, name="like_answer"),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

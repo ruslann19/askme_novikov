@@ -20,8 +20,8 @@ class Tag(models.Model):
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    avatar = models.ImageField(upload_to="./uploads/", blank=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    avatar = models.ImageField(upload_to="images", blank=True)
     rating = models.IntegerField(default=0)
 
     def __str__(self):
@@ -82,27 +82,27 @@ class Answer(models.Model):
 
 class QuestionLike(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="likes")
-    user = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="question_likes")
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="question_likes")
     value = models.BooleanField()
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["question", "user"], name="unique_question_like")
+            models.UniqueConstraint(fields=["question", "profile"], name="unique_question_like")
         ]
 
     def __str__(self):
-        return f"{self.question}, {self.user}"
+        return f"{self.question}, {self.profile}"
 
 
 class AnswerLike(models.Model):
     answer = models.ForeignKey(Answer, on_delete=models.CASCADE, related_name="likes")
-    user = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="answer_likes")
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="answer_likes")
     value = models.BooleanField()
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["answer", "user"], name="unique_answer_like")
+            models.UniqueConstraint(fields=["answer", "profile"], name="unique_answer_like")
         ]
 
     def __str__(self):
-        return f"{self.answer}, {self.user}"
+        return f"{self.answer}, {self.profile}"

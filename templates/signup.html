@@ -8,7 +8,7 @@ Sign up
 {% block page_content %}
     <h1 class="mb-3">Registration</h1>
 
-    <form action="{% url 'signup' %}" method="POST" class="w-75 needs-validation" novalidate>
+    <form action="{% url 'signup' %}" method="POST" class="w-75 needs-validation" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
 
         {% bootstrap_form user_form %}

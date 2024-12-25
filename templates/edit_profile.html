@@ -8,7 +8,7 @@ Edit profile
 {% block page_content %}
     <h1 class="mb-3">Edit profile</h1>
 
-    <form action="{% url 'edit_profile' %}" method="POST" class="w-75 needs-validation" novalidate>
+    <form action="{% url 'edit_profile' %}" method="POST" class="w-75 needs-validation" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
 
         {% bootstrap_form user_form %}

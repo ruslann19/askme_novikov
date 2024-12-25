@@ -112,7 +112,7 @@ class Command(BaseCommand):
         quistion_likes = [
             QuestionLike(
                 question=questions[question_id % QUESTIONS],
-                user=profiles[(question_id + i) % PROFILES], # По 10 разных пользователей на каждый вопрос
+                profile=profiles[(question_id + i) % PROFILES], # По 10 разных пользователей на каждый вопрос
                 value=self.__random_like_value(question_id),
             )
             for question_id in range(first_question_id, first_question_id + QUESTIONS)
@@ -126,7 +126,7 @@ class Command(BaseCommand):
         answer_likes = [
             AnswerLike(
                 answer=answers[answer_id % ANSWERS],
-                user=profiles[(answer_id + i) % PROFILES], # По 10 разных пользователей на каждый ответ
+                profile=profiles[(answer_id + i) % PROFILES], # По 10 разных пользователей на каждый ответ
                 value=self.__random_like_value(answer_id),
             )
             for answer_id in range(first_answer_like_id, first_answer_like_id + ANSWERS)

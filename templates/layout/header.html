@@ -14,8 +14,12 @@
 
         <div class="d-flex gap-3 me-5">
             {% if request.user.is_authenticated %}
-                <img src="{% static 'img/Jacque_Fresco.jpg' %}" alt="Avatar" class="img-thumbnail" style="width: 50px;">
-            
+                {% if profile.avatar %}
+                    <img src="{{ profile.avatar.url }}" alt="Avatar" class="img-thumbnail" style="width: 50px;">
+                {% else %}
+                    <img src="" alt="Avatar" class="img-thumbnail" style="width: 50px;">
+                {% endif %}
+
                 <div class="d-flex flex-column gap-2">
                     <div>
                         {{ request.user.username }}
