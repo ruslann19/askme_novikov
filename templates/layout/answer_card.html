@@ -1,6 +1,8 @@
 {% load static %}
 
-<article class="border">
+
+
+<article class="border" id="answer_{{ answer.id }}">
     <div class="row m-3">
         <div class="col-3 d-flex flex-column gap-2 align-items-center">
             <img src="{% static 'img/Jacque_Fresco.jpg' %}" alt="Avatar" class="img-thumbnail" style="width: 100px;">
@@ -20,7 +22,7 @@
                 {{ answer.text }}
             </div>
 
-            {% if forloop.first %}
+            {% if answer.is_correct %}
                 <div>
                     <span>Correct</span>
                     <img src="{% static 'img/check.svg' %}" alt="Check" style="width: 30px;">

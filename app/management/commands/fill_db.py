@@ -6,6 +6,8 @@ from app.models import *
 from tqdm import tqdm
 import time
 
+from django.contrib.auth.hashers import make_password
+
 
 class Command(BaseCommand):
     help = "Fill database"
@@ -42,8 +44,6 @@ class Command(BaseCommand):
         first_question_like_id = self.__first_id_to_generation(QuestionLike)
         first_answer_like_id = self.__first_id_to_generation(AnswerLike)
 
-        self.stdout.write(f"{first_question_id}")
-
 
         self.stdout.write("Creating tags")
         tags = [
@@ -57,13 +57,13 @@ class Command(BaseCommand):
         self.stdout.write("Creating users")
         users = [
             User(
-                username=f'User {user_id}',
-                first_name=f'FirstName{user_id}',
-                last_name=f'LastName{user_id}',
-                email=f'user{user_id}@gmail.com',
-                password=f'pass{user_id}',
+                username=f'user_{user_id}',
+                first_name=f'first_name_{user_id}',
+                last_name=f'last_name_{user_id}',
+                email=f'user_{user_id}@gmail.com',
+                password=make_password(f'password_{user_id}'),
             )
-            for user_id in range(first_user_id, first_user_id + USERS)
+            for user_id in tqdm(range(first_user_id, first_user_id + USERS))
         ]
         User.objects.bulk_create(users)
         self.stdout.write(self.style.SUCCESS("Users created"))
