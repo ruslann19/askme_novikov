@@ -30,6 +30,7 @@ urlpatterns = [
     path("",                             views.index,        name="index"),
     path("hot/",                         views.hot,          name="hot"),
     path("tag/<str:tag_name>/",          views.tag,          name="tag"),
+    path("my_questions/",                views.my_questions, name="my_questions"),
     path("question/<int:id>/",           views.question,     name="question"),
     
     path("login/",                       views.login,        name="login"),
@@ -41,7 +42,9 @@ urlpatterns = [
     path("ask/",                         views.ask,          name="ask"),
 
     path("like_question/<int:question_id>", views.like_question, name="like_question"),
-    path("like_answer/<int:answer_id>", views.like_question, name="like_answer"),
+    path("like_answer/<int:answer_id>", views.like_answer, name="like_answer"),
+
+    path("correct_answer/<int:answer_id>", views.correct_answer, name="correct_answer"),
 ]
 
 if settings.DEBUG:

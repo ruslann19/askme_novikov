@@ -34,6 +34,7 @@ def paginate(objects_list, page=1, per_page=PER_PAGE):
 
 def index(request):
     page = paginate(Question.objects.new(), request.GET.get("page", 1))
+
     context = {
         "questions": page.object_list,
         "page_obj": page,
@@ -56,7 +57,7 @@ def hot(request):
     return render(request, "hot.html", context)
 
 
-def tag(request: HttpRequest, tag_name):
+def tag(request, tag_name):
     tag = get_object_or_404(Tag, name=tag_name)
 
     questions_with_tag = Question.objects.get_questions_with_tag(tag)
@@ -73,10 +74,24 @@ def tag(request: HttpRequest, tag_name):
     return render(request, "tag.html", context)
 
 
+@login_required
+def my_questions(request):
+    page = paginate(Question.objects.filter(author=request.user.profile), request.GET.get("page", 1))
+
+    context = {
+        "questions": page.object_list,
+        "page_obj": page,
+        "popular_tags": Tag.objects.popular(),
+    }
+    if not request.user.is_anonymous:
+        context["profile"] = request.user.profile
+    return render(request, "my_questions.html", context)
+
+
 def question(request, id, page_number=1):
     if request.method == "GET":
         question = Question.objects.get(pk=id)
-        page = paginate(question.answers.all(), request.GET.get("page", 1))
+        page = paginate(question.answers.all().order_by("created_at"), request.GET.get("page", 1))
 
         form = AnswerForm(initial={"question_id": id})
 
@@ -95,7 +110,7 @@ def question(request, id, page_number=1):
             )
             answer.save()
 
-            page = paginate(question.answers.all(), page=1)
+            page = paginate(question.answers.all().order_by("-created_at"), page=1)
             page_number = page.paginator.num_pages
 
             return redirect(
@@ -273,26 +288,90 @@ def ask(request):
 def like_question(request, question_id):
     question = Question.objects.get(id=question_id)
     profile = request.user.profile
-    value = (request.POST.get("value") == "Like")
-
-    print(question)
-    print(profile)
-    print(value)
+    value = (request.POST.get("action") == "Like")
 
     exists = QuestionLike.objects.filter(question=question, profile=profile).exists()
 
     if exists:
-        pass
+        question_like = QuestionLike.objects.get(question=question, profile=profile)
+        stored_value = question_like.value
 
-    QuestionLike.objects.create(
-        question=question,
-        profile=profile,
-        value=value
-    )
+        if stored_value == value:
+            question_like.delete()
+        else:
+            question_like.delete()
+            QuestionLike.objects.create(
+                question=question,
+                profile=profile,
+                value=value
+            )
+    else:
+        QuestionLike.objects.create(
+            question=question,
+            profile=profile,
+            value=value
+        )
 
-    # return HttpResponseRedirect(request.path_info)
-    return redirect(reverse("index"))
+    next = request.POST.get("next", "/")
+    return HttpResponseRedirect(next)
 
+
+@require_POST
 @login_required
-def like_answer(requset, answer_id):
-    pass
+def like_answer(request, answer_id):
+    answer = Answer.objects.get(id=answer_id)
+    profile = request.user.profile
+    value = (request.POST.get("action") == "Like")
+
+    exists = AnswerLike.objects.filter(answer=answer, profile=profile).exists()
+
+    if exists:
+        answer_like = AnswerLike.objects.get(answer=answer, profile=profile)
+        stored_value = answer_like.value
+
+        if stored_value == value:
+            answer_like.delete()
+        else:
+            answer_like.delete()
+            AnswerLike.objects.create(
+                answer=answer,
+                profile=profile,
+                value=value
+            )
+    else:
+        AnswerLike.objects.create(
+            answer=answer,
+            profile=profile,
+            value=value
+        )
+
+    next = request.POST.get("next", "/")
+    return HttpResponseRedirect(next)
+
+
+@require_POST
+@login_required
+def correct_answer(request, answer_id):
+    answer = Answer.objects.get(id=answer_id)
+
+    answers = answer.question.answers
+    
+    exists = answers.filter(is_correct=True).exists()
+
+    if exists:
+        previous_correct = answers.get(is_correct=True)
+        if previous_correct == answer:
+            previous_correct.is_correct = False
+            answer.is_correct = False
+        else:
+            previous_correct.is_correct = False
+            answer.is_correct = True
+    
+        previous_correct.save()
+    else:
+        answer.is_correct = True
+    
+    answer.save()
+
+    next = request.POST.get("next", "/")
+    return HttpResponseRedirect(next)
